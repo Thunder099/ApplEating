@@ -10,37 +10,49 @@ branco = (255, 255, 255)
 preto = (0, 0, 0)
 vermelho = (255, 0, 0)
 laranja = (255, 165, 0)
+verde = (0, 255, 0)
 
+# tamanho do mapa
 width, height = 500, 400
 
+# talvez aqui ele renderize o jogo inteiro, para visualizar tudo?
 game_display = pygame.display.set_mode((width, height))
 pygame.display.set_caption("ApplEating")
 
+# aqui eu acho que ele ta definindo uma variavel que vai ser o "tick rate" do jogo, ou seja, quão rápido ele acontece
 clock = pygame.time.Clock()
 
+# nao entendi o snake_size, só sei que ele é importante para o movimento da cobrinha, a velocidade é usada la embaixo junto com o clock
 snake_size = 10
 snake_speed = 10
 
-message_font = pygame.font.SysFont('ubuntu', 30)
+# aqui eu estou definindo fontes de texto e o tamanho em uma variavel, a fonte é "ubuntu" e tem uma variação no tamanho das letras, que são os numeros
+message_font = pygame.font.SysFont('ubuntu', 40)
+message_font2 = pygame.font.SysFont('ubuntu', 20)
 score_font = pygame.font.SysFont('ubuntu', 25)
 
-###########################
 
 #funções
 
 # mostra os pontos na tela
 def print_score(score):    
-    text = score_font.render("Score: "+ str(score), True, laranja)
+    text = score_font.render("Pontos: "+ str(score), True, laranja)
+
+    # talvez aqui ele esteja falando para mostrar os pontos na tela do jogo? com a variavel "text" e depois a coordenada [x,y]?
     game_display.blit(text, [0,0])
 
-# desenha a cobra
+# desenha a cobra; rect significa rectangle -> retangulo, basicamente ta falando pra fazer a cobra renderizar usando quadrados
 def draw_snake(snake_size, snake_pixels):
     for pixel in snake_pixels:
+
+        # não entendi direito oque as coisas fazem aqui, pygame.draw.rect "manda ele renderizar quadrados" pygame.draw.rect(na janela do jogo?, a cor do personagem, [pixel?[coordenada?], pixel?[coordenada?], mais tamanho?, mais tamanho?])
         pygame.draw.rect(game_display, branco, [pixel[0], pixel[1], snake_size, snake_size])
 
 
+# tudo acontece aqui aparentemente, isso aqui é a programação do jogo inteiro, define algumas variaveis, interações, etc.
 def run_game():
 
+    # definindo algumas variavéis
     game_over = False
     game_close = False
 
@@ -50,37 +62,59 @@ def run_game():
     x_speed = 0
     y_speed = 0
 
+    # oia a lista sendo usada ai hihihi
     snake_pixels = []
     snake_length = 1
 
+    # isso aqui ele ta falando pra spawnar a comida em um lugar aleatório
     target_x = round(random.randrange(0, width - snake_size) / 10.0) * 10.0
     target_y = round(random.randrange(0, height - snake_size) / 10.0) * 10.0   
 
     while not game_over:
 
         while game_close:
+            
+            # mostra a tela de game over aqui embaixo é o fundo
             game_display.fill(preto)
-            game_over_message = message_font.render("Game Over!", True, vermelho)
-            game_display.blit(game_over_message, [width / 3, height / 3])
+            # renderiza as mensagens na tela, ("palavra", nao sei porque mais precisa, cor)
+            game_over_message = message_font.render("Game Over!", True, branco)
+            game_over_message2 = message_font2.render("[1]Reiniciar", True, verde)
+            game_over_message3 = message_font2.render("[2]Fechar", True, vermelho)
+
+            # aqui muda a posição das palavras na tela 'eu juro que nao ta desalinhado'
+            game_display.blit(game_over_message, [width / 3.5, height / 3])
+            game_display.blit(game_over_message2, [width / 3.5, height / 2])
+            game_display.blit(game_over_message3, [width / 2, height / 2])
+
+            # aqui ele pega o score e diminui -1, porque se nao tiver logo no começo voce ja vai ter um ponto, que seria a cabeça do seu personagem '-'
             print_score(snake_length - 1)
+            # nao sei? talvez aqui ele manda atualizar tudo que falei ali em cima?
             pygame.display.update()
 
+            # isso aqui são os botões 1 e 2, que são os que reiniciam ou fecham o jogo
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_1:
+                    if event.key == pygame.K_2:
                         game_over = True
                         game_close = False
-                    if event.key == pygame.K_2:
+                    if event.key == pygame.K_1:
                         run_game()
                 if event.type == pygame.QUIT:
                     game_over = True
                     game_close = False
 
+
+        # (foi usado IA como ajuda)
+
+        # esse trecho do código aparentemente pega todos os eventos usando o comando "for" como teclas apertadas, quando o tipo for pygame.QUIT(quando fecha a janela), o jogo é encerrado atribuindo True a variavel "game_over"
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
+
+            # pygame.KEYDOWN significa que a tecla foi pressionada.
             if event.type == pygame.KEYDOWN:
-                # Impede que a cobra se mova na direção oposta
+
+                # Impede que a cobra se mova na direção oposta (explicação mais detalhada mais abaixo)
                 if event.key == pygame.K_LEFT and x_speed == 0:
                     x_speed = -snake_size
                     y_speed = 0
@@ -95,6 +129,9 @@ def run_game():
                     y_speed = snake_size
 
                 # Bloquear movimento 180 graus
+
+                 # exemplo: se a cobra está indo para a direita (x_speed = snake_size), e o jogador tenta apertar a tecla esquerda(pygame.K_LEFT), o código não permite, porque (x_speed != snake_size). Ou seja, não podemos mudar a direção para a esquerda, pois a cobra já está indo para a direita; pelo oque entendi: está indo para a direita (x_speed = snake_size), ele verifica se isso é verdade o tempo todo, (direita = snake_size) (esquerda = -snake_size) se for igual a 'snake_size' ele nao deixa voce virar para a esquerda que é snake_size só que negativo, usando o termo "and" ('e' em ingles) onde é preciso que ambas as afirmações sejam verdadeiras para funcionar
+
                 if event.key == pygame.K_LEFT and x_speed != snake_size:  # Não pode ir para a esquerda se já estiver indo para a direita
                     x_speed = -snake_size
                     y_speed = 0
@@ -108,7 +145,7 @@ def run_game():
                     x_speed = 0
                     y_speed = snake_size
 
-        # Verificando se a cobra saiu das bordas
+        # Verificando se a cobra saiu das bordas; basicamente falando pro código que se estiver mais que essa coordenada quer dizer que voce perdeu, ai ele faz a variavel "game_close" verdadeira
         if x >= width or x < 0 or y >= height or y < 0:
             game_close = True
 
@@ -136,16 +173,23 @@ def run_game():
         pygame.display.update()
 
         # Verificando se a cobra comeu a comida
+
+        # aqui ele verifica se a coordenada da cabeça da cobra é EXATAMENTE a coordenada da comida
         if x == target_x and y == target_y:
+
+            # caso ele atinja exatamente a coordenada da comida, ele vai spawnar outra comida num lugar aleatório
             target_x = round(random.randrange(0, width - snake_size) / 10.0) * 10.0
             target_y = round(random.randrange(0, height - snake_size) / 10.0) * 10.0            
 
+            # depois que ele faz isso tudo, o tamanho da cobrinha aumenta em 1
             snake_length += 1
             
-
+        # acho que aqui é o 'tick rate' do jogo, ou seja, quão rapido o jogo atualiza
         clock.tick(snake_speed)
 
+    # acho que aqui é quando estora tudo, só finaliza o loop, ou fecha, talvez
     pygame.quit()
     quit()
 
+# aqui ele chama a função, para começar o jogo
 run_game()
