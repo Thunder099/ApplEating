@@ -1,5 +1,4 @@
 # Base do jogo
-
 import pygame
 import random
 
@@ -12,24 +11,25 @@ preto = (0, 0, 0)
 vermelho = (255, 0, 0)
 laranja = (255, 165, 0)
 
-width, height = 600, 400
+width, height = 500, 400
 
 game_display = pygame.display.set_mode((width, height))
-pygame.display.set_caption("NeuralNine Snake Game")
+pygame.display.set_caption("ApplEating")
 
 clock = pygame.time.Clock()
 
 snake_size = 10
-snake_speed = 15
+snake_speed = 10
 
 message_font = pygame.font.SysFont('ubuntu', 30)
 score_font = pygame.font.SysFont('ubuntu', 25)
 
 ###########################
+
 #funções
 
 # mostra os pontos na tela
-def print_score(score):
+def print_score(score):    
     text = score_font.render("Score: "+ str(score), True, laranja)
     game_display.blit(text, [0,0])
 
@@ -80,16 +80,31 @@ def run_game():
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
+                # Impede que a cobra se mova na direção oposta
+                if event.key == pygame.K_LEFT and x_speed == 0:
                     x_speed = -snake_size
                     y_speed = 0
-                if event.key == pygame.K_RIGHT:
+                if event.key == pygame.K_RIGHT and x_speed == 0:
                     x_speed = snake_size
                     y_speed = 0
-                if event.key == pygame.K_UP:
+                if event.key == pygame.K_UP and y_speed == 0:
                     x_speed = 0
                     y_speed = -snake_size
-                if event.key == pygame.K_DOWN:
+                if event.key == pygame.K_DOWN and y_speed == 0:
+                    x_speed = 0
+                    y_speed = snake_size
+
+                # Bloquear movimento 180 graus
+                if event.key == pygame.K_LEFT and x_speed != snake_size:  # Não pode ir para a esquerda se já estiver indo para a direita
+                    x_speed = -snake_size
+                    y_speed = 0
+                if event.key == pygame.K_RIGHT and x_speed != -snake_size:  # Não pode ir para a direita se já estiver indo para a esquerda
+                    x_speed = snake_size
+                    y_speed = 0
+                if event.key == pygame.K_UP and y_speed != snake_size:  # Não pode ir para cima se já estiver indo para baixo
+                    x_speed = 0
+                    y_speed = -snake_size
+                if event.key == pygame.K_DOWN and y_speed != -snake_size:  # Não pode ir para baixo se já estiver indo para cima
                     x_speed = 0
                     y_speed = snake_size
 
@@ -123,9 +138,10 @@ def run_game():
         # Verificando se a cobra comeu a comida
         if x == target_x and y == target_y:
             target_x = round(random.randrange(0, width - snake_size) / 10.0) * 10.0
-            target_y = round(random.randrange(0, height - snake_size) / 10.0) * 10.0
+            target_y = round(random.randrange(0, height - snake_size) / 10.0) * 10.0            
 
             snake_length += 1
+            
 
         clock.tick(snake_speed)
 
