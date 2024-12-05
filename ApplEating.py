@@ -15,14 +15,16 @@ verde = (0, 255, 0)
 # tamanho do mapa
 width, height = 500, 400
 
-# talvez aqui ele renderize o jogo inteiro, para visualizar tudo?
+# aqui é basicamente a janela do jogo
 game_display = pygame.display.set_mode((width, height))
+
+# aqui é o nome que a janela do jogo vai ter
 pygame.display.set_caption("ApplEating")
 
-# aqui eu acho que ele ta definindo uma variavel que vai ser o "tick rate" do jogo, ou seja, quão rápido ele acontece
+# aqui eu acho que ele ta definindo uma variavel que vai ser o "tick rate" do jogo, ou seja, quão rápido ele "atualiza"
 clock = pygame.time.Clock()
 
-# nao entendi o snake_size, só sei que ele é importante para o movimento da cobrinha, a velocidade é usada la embaixo junto com o clock
+# snake size é o tamanho dos quadradinhos "deixar o snake_size no 20 quebra o jogo", a velocidade é usada la embaixo junto com o clock
 snake_size = 10
 snake_speed = 10
 
@@ -38,14 +40,16 @@ score_font = pygame.font.SysFont('ubuntu', 25)
 def print_score(score):    
     text = score_font.render("Pontos: "+ str(score), True, laranja)
 
-    # talvez aqui ele esteja falando para mostrar os pontos na tela do jogo? com a variavel "text" e depois a coordenada [x,y]?
+    # aqui ele está falando para mostrar os pontos na tela do jogo com a variavel "text" e depois a coordenada [x,y], adicionar o X faz a coordenada ir mais para a direita, adicionar o Y faz a coordenada ir mais para baixo
     game_display.blit(text, [0,0])
 
-# desenha a cobra; rect significa rectangle -> retangulo, basicamente ta falando pra fazer a cobra renderizar usando quadrados
+# aqui é onde desenha a cobra; rect significa rectangle -> retangulo, basicamente ta falando pra fazer a cobra renderizar usando quadrados
 def draw_snake(snake_size, snake_pixels):
     for pixel in snake_pixels:
 
-        # não entendi direito oque as coisas fazem aqui, pygame.draw.rect "manda ele renderizar quadrados" pygame.draw.rect(na janela do jogo?, a cor do personagem, [pixel?[coordenada?], pixel?[coordenada?], mais tamanho?, mais tamanho?])
+        # snake_size, define o tamanho de cada segmento da cobra (largura e altura dos quadrados), snake_pixels é uma lista de posições (X, Y) que reprentam os segmentos da cobra. Cada posição na lista é um segmento da cobra, o loop 'for' percorre cada segmento da cobra, pixel é uma lista que tem coordenadas (X, Y) de cada segmento
+
+        # pygame.draw.rect desenha um retângulo(ou quadrado) na tela, game_display é a janela do jogo, branco é a cor, [pixel[0], pixel[1], snake_size, snake_size]: Essa lista define o retângulo a ser desenhado; pixel[0] é a posição X pixel[1] é a posição Y depois disso vem a largura e a altura do retangulo
         pygame.draw.rect(game_display, branco, [pixel[0], pixel[1], snake_size, snake_size])
 
 
@@ -74,9 +78,9 @@ def run_game():
 
         while game_close:
             
-            # mostra a tela de game over aqui embaixo é o fundo
+            # mostra a tela de game over, aqui embaixo é o fundo
             game_display.fill(preto)
-            # renderiza as mensagens na tela, ("palavra", nao sei porque mais precisa, cor)
+            # renderiza as mensagens na tela, ("texto", basicamente ativa o 'antialiasing' que deixa as bordas do texto mais suavizadas ao invés de serrilhadas, cor)
             game_over_message = message_font.render("Game Over!", True, branco)
             game_over_message2 = message_font2.render("[1]Reiniciar", True, verde)
             game_over_message3 = message_font2.render("[2]Fechar", True, vermelho)
@@ -86,12 +90,13 @@ def run_game():
             game_display.blit(game_over_message2, [width / 3.5, height / 2])
             game_display.blit(game_over_message3, [width / 2, height / 2])
 
-            # aqui ele pega o score e diminui -1, porque se nao tiver logo no começo voce ja vai ter um ponto, que seria a cabeça do seu personagem '-'
+            # aqui ele pega o score e diminui -1, porque se nao tivesse isso logo no começo do jogo voce ja vai ter um ponto, que seria a cabeça do seu personagem '-'
             print_score(snake_length - 1)
-            # nao sei? talvez aqui ele manda atualizar tudo que falei ali em cima?
+            # isso aqui ele só atualiza as mudanças feitas
             pygame.display.update()
 
             # isso aqui são os botões 1 e 2, que são os que reiniciam ou fecham o jogo
+            # enquanto game_over nao for verdade tudo continua rodando, a partir do momento que é verdade, o código inteiro para imediatamente, o quit é basicamente se voce fechar pelo X
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_2:
@@ -152,7 +157,7 @@ def run_game():
         x += x_speed
         y += y_speed
 
-        # Atualizando o fundo e o alvo
+        # Atualizando o fundo e a comida
         game_display.fill(preto)
         pygame.draw.rect(game_display, laranja, [target_x, target_y, snake_size, snake_size])
 
